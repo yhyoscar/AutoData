@@ -35,21 +35,23 @@ def download_amazon_jobs(pdata):
     valid_loc = [loc.get_attribute('id') for loc in all_loc if loc.is_displayed()]
     
     for jobloc in valid_loc:
-        print('======= download job list at location:', jobloc, '=======')
-        url = "https://www.amazon.jobs/en/locations/"+jobloc+"?offset=0&sort=recent&job_type=Full-Time"
-        njob = get_job_count(driver, url)
-        print('location: ', jobloc, ', job count:', njob)
-        
-        npage = int(np.ceil(njob/10))
-        urls = ["https://www.amazon.jobs/en/locations/"+jobloc+"?offset="+format(int(i*10))+"&sort=recent&job_type=Full-Time" for i in range(npage)]
+        if not os.path.exists(pdata+'/'+jobloc+'.json'):
+            print('======= download job list at location:', jobloc, '=======')
+            url = "https://www.amazon.jobs/en/locations/"+jobloc+"?offset=0&sort=recent&job_type=Full-Time"
+            njob = get_job_count(driver, url)
+            print('location: ', jobloc, ', job count:', njob)
+            
+            if njob > 0:
+                npage = int(np.ceil(njob/10))
+                urls = ["https://www.amazon.jobs/en/locations/"+jobloc+"?offset="+format(int(i*10))+"&sort=recent&job_type=Full-Time" for i in range(npage)]
 
-        arglist = [(urls[i::nprocess], ) for i in range(nprocess)]
-        with multiprocessing.Pool(processes=nprocess) as pool:
-            jobs = pool.starmap(one_process_get_urls, arglist)
-        jobs = sum(jobs, [])
+                arglist = [(urls[i::nprocess], ) for i in range(nprocess)]
+                with multiprocessing.Pool(processes=nprocess) as pool:
+                    jobs = pool.starmap(one_process_get_urls, arglist)
+                jobs = sum(jobs, [])
 
-        print('save job list to:', pdata+'/'+jobloc+'.json')
-        json.dump(jobs, open(pdata+'/'+jobloc+'.json', 'w'), indent=2)
+                print('save job list to:', pdata+'/'+jobloc+'.json')
+                json.dump(jobs, open(pdata+'/'+jobloc+'.json', 'w'), indent=2)
 
     driver.close()
     return 
@@ -72,7 +74,7 @@ def get_job_count(driver, url, request=True):
     if jobcount:
         return int(re.findall("of.*?jobs", jobcount.text)[0].split(' ')[1])
     else:
-        sys.exit('Error: timeout in getting job count')
+        return 0
 
 
 def get_job_list(driver, url, request=True):
