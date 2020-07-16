@@ -28,8 +28,9 @@ def download_detail(nprocess = 8):
     for k in range(5):
         prefix = prefixs[k]
         url_root = url_roots[k]
-
-        urls = [url_root + format(uid)  for uid in range(search_id_range[0], search_id_range[1])]
+        tmp = list(range(search_id_range[0], search_id_range[1]))
+        np.random.shuffle(tmp)
+        urls = [url_root + format(uid)  for uid in tmp]
         pout = prefix
         
         arglist = [(url, pout+'/'+url.split('=')[-1], url.split('=')[-1]) for url in urls]
