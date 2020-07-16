@@ -2,7 +2,7 @@
 
 - Data scrapping
 - Big data analysis
-- Data minning
+- Data mining
 
 ## Dependencies:
 - pip install nltk
