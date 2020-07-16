@@ -1,2 +1,5 @@
-# getjobs
-Get jobs with web scraper
+# AutoData
+
+- Data scrapping
+- Big data analysis
+- Data minning
