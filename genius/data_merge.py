@@ -22,7 +22,9 @@ def merge_data(phtml, pdetail, pout, nprocess = 8):
     print(phtml, 'listed awards:', len(awards))
 
     # valid IDs
-    sids = [os.path.basename(fn)[:-5] for fn in glob.glob(pdetail+'/*/*.json') if open(fn,'r').read().strip() != "{}"]    
+    sids = [os.path.basename(fn)[:-5] for fn in glob.glob(pdetail+'/*/*.json') if open(fn,'r').read().strip() != "{}"] 
+
+    print('valid IDs:', len(sids))   
 
     arglist = [(pdetail, pout, sid, awards) for sid in sids]
     with multiprocessing.Pool(processes=nprocess) as pool:
