@@ -15,19 +15,16 @@ from bs4 import BeautifulSoup
 from multiprocessing import Pool
 
 
-def merge_data(nprocess = 8):
-    prefix = "student_innovation"
-    pin = "./"+prefix
-    pout = "./clean_data/"+prefix
+def merge_data(phtml, pdetail, pout, nprocess = 8):
     if not os.path.isdir(pout): os.system('mkdir -p '+pout)
 
-    awards = get_award_info(glob.glob(pin+'/awards/*.html'))
-    print(prefix, 'listed awards:', len(awards))
+    awards = get_award_info(glob.glob(phtml+'/*.html'))
+    print(phtml, 'listed awards:', len(awards))
 
     # valid IDs
-    sids = [os.path.basename(fn)[:-5] for fn in glob.glob(pin+'/details/*/*.json') if open(fn,'r').read().strip() != "{}"]    
+    sids = [os.path.basename(fn)[:-5] for fn in glob.glob(pdetail+'/*/*.json') if open(fn,'r').read().strip() != "{}"]    
 
-    arglist = [(pin+'/details', pout, sid, awards) for sid in sids]
+    arglist = [(pdetail, pout, sid, awards) for sid in sids]
     with multiprocessing.Pool(processes=nprocess) as pool:
         pool.starmap(insert_award_info, arglist)
 
@@ -77,9 +74,15 @@ def insert_award_info(pold, pnew, sid, awards):
 
 if __name__== "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("-p", "--pages", type=str, required=True, default=None, 
+                        help="path of html pages with award information")
+    parser.add_argument("-d", "--details", type=str, required=True, default=None, 
+                        help="path of details data")
+    parser.add_argument("-o", "--output", type=str, required=True, default=None, 
+                        help="output path of merged data")
     parser.add_argument("-n", "--nprocess", type=int, required=False, default=8, 
                         help="number of processes")
     args = parser.parse_args()
 
-    merge_data(nprocess = args.nprocess)
+    merge_data(args.pages, args.details, args.output, nprocess = args.nprocess)
 
